@@ -1,4 +1,4 @@
-# 🤖 BEN-10 MD BOT
+# 🤖 Lady bella
 
 A powerful and customizable **WhatsApp Multi-Device Bot** built using the Baileys library. It features group moderation, auto replies, stickers, media tools, games, and more — all optimized for modern WhatsApp multi-device support.
 
