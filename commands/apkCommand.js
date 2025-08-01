@@ -1,28 +1,29 @@
-
-
 const axios = require('axios');
 
 async function apkCommand(sock, chatId, message) {
     try {
         const text = message.message?.conversation || message.message?.extendedTextMessage?.text;
-        const query = text.split(' ').slice(1).join(' ').trim();
+        const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+        const quotedText = quoted?.conversation || quoted?.extendedTextMessage?.text;
+        const inputText = quotedText || text;
+        const query = inputText.split(' ').slice(1).join(' ').trim();
 
         if (!query) {
             return await sock.sendMessage(chatId, {
                 text: "❌ Please provide an app name to search.\n\nExample: *.apk Instagram*"
-            });
+            }, { quoted: message });
         }
 
         await sock.sendMessage(chatId, { react: { text: "⏳", key: message.key } });
 
-        const apiUrl = `http://ws75.aptoide.com/api/7/apps/search/query=${query}/limit=1`;
+        const apiUrl = `http://ws75.aptoide.com/api/7/apps/search/?q=${query}&limit=1`;
         const response = await axios.get(apiUrl);
         const data = response.data;
 
-        if (!data || !data.datalist || !data.datalist.list.length) {
+        if (!data?.datalist?.list?.length) {
             return await sock.sendMessage(chatId, {
                 text: "⚠️ No results found for the given app name."
-            });
+            }, { quoted: message });
         }
 
         const app = data.datalist.list[0];
@@ -52,8 +53,9 @@ async function apkCommand(sock, chatId, message) {
         console.error("APK Error:", error);
         await sock.sendMessage(chatId, {
             text: "❌ An error occurred while fetching the APK. Please try again."
-        });
+        }, { quoted: message });
     }
 }
 
 module.exports = apkCommand;
+                
